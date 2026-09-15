@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { history } from "@/data/history";
 import { formatMinutes } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
+import VersionFooter from "@/components/VersionFooter";
 
 const dash = "—";
 
@@ -110,6 +111,8 @@ export default function HistoryPage() {
             </tbody>
           </table>
         </div>
+
+        <VersionFooter />
       </div>
     </main>
   );

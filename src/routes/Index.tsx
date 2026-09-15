@@ -4,6 +4,7 @@ import { roadmap } from "@/data/roadmap";
 import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
 import { computeTotals, formatMinutes } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
+import VersionFooter from "@/components/VersionFooter";
 
 const toneClasses: Record<string, string> = {
   automated: "bg-status-done border-status-done",
@@ -204,6 +205,8 @@ export default function RoadmapOverview() {
           </section>
         ))}
       </div>
+
+      <VersionFooter />
     </main>
   );
 }
