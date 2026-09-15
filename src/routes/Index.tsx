@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { roadmap } from "@/data/roadmap";
 import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
+import { computeTotals, formatMinutes } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
-import VersionFooter from "@/components/VersionFooter";
 
 const toneClasses: Record<string, string> = {
   automated: "bg-status-done border-status-done",
@@ -11,8 +11,44 @@ const toneClasses: Record<string, string> = {
   manual: "bg-status-idle border-status-idle",
 };
 
+function SummaryStat({
+  label,
+  value,
+  sub,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg bg-card px-4 py-3",
+        highlight ? "border-2 border-foreground/40" : "border border-border",
+      )}
+    >
+      <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 text-lg text-foreground",
+          highlight ? "font-bold" : "font-semibold",
+        )}
+      >
+        {value}
+      </p>
+      {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
+    </div>
+  );
+}
+
 export default function RoadmapOverview() {
   const [owner, setOwner] = useState<string>("All");
+
+  const totals = computeTotals(roadmap);
 
   const phases = roadmap
     .map((phase) => ({
@@ -37,6 +73,48 @@ export default function RoadmapOverview() {
           milestone to see its tasks, automation level and time saved.
         </p>
       </header>
+
+      <section className="mb-8 rounded-xl border border-border bg-card px-5 py-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-foreground">Process overview</h2>
+          <Link
+            to="/history"
+            className="text-xs font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+          >
+            View history over time →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <SummaryStat
+            label="Time spent / month (before)"
+            value={formatMinutes(totals.totalPreviousMinutes)}
+          />
+          <SummaryStat
+            label="Time spent / month (now)"
+            value={formatMinutes(totals.totalCurrentMinutes)}
+          />
+          <SummaryStat
+            label="Time saved / month"
+            value={formatMinutes(totals.minutesSaved)}
+            sub={
+              totals.totalPreviousMinutes > 0
+                ? `${totals.percentSaved.toFixed(0)}% reduction`
+                : undefined
+            }
+            highlight
+          />
+          <SummaryStat
+            label="Tasks automated"
+            value={`${totals.automatedCount} of ${totals.totalTasks}`}
+            sub={`${totals.semiAutomatedCount} semi-automated · ${totals.manualCount} manual`}
+          />
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Based on {totals.milestonesTracked} of {totals.totalMilestones} milestones
+          with time data recorded so far — totals will grow as more time-taken data
+          is added to the sheet.
+        </p>
+      </section>
 
       <div className="mb-8 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-medium text-muted-foreground">
@@ -126,8 +204,6 @@ export default function RoadmapOverview() {
           </section>
         ))}
       </div>
-
-      <VersionFooter />
     </main>
   );
 }
