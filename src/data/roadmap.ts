@@ -391,6 +391,8 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            previousTimeTaken: "90 mins",
+            currentTimeTaken: "15 mins",
           },
           {
             title: "Ecommerce Access Email Added As Admin User",
