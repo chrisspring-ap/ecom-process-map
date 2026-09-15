@@ -9,6 +9,7 @@ import {
 } from "@/lib/roadmap-meta";
 
 import { cn } from "@/lib/utils";
+import VersionFooter from "@/components/VersionFooter";
 
 const automationClasses: Record<string, string> = {
   "Semi Automated": "bg-status-warn/15 text-foreground border-status-warn/40",
@@ -200,6 +201,8 @@ export default function MilestoneDetail() {
             </tbody>
           </table>
         </div>
+
+        <VersionFooter />
       </div>
     </main>
   );
