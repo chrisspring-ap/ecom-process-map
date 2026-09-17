@@ -129,27 +129,26 @@ export const roadmap: Phase[] = [
         ],
       },
       {
-        title: "AM calls client to book welcome call",
+        title: "Inital client contacnt",
         owner: "Account Manager",
         automationLevel: "Manual",
         monthlyInstances: 73,
         subtasks: [
           {
-            title: "If no response to call, send email with welcome call times and access",
+            title: "AM calls client to book welcome call",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            monthlyInstances: 73,
+            currentTimeTaken: "5 mins",
+          },
+          {
+            title: "AM sends email follow up confirming welcome call and requesting access",
             owner: "Account Manager",
             automationLevel: "Manual",
             monthlyInstances: 73,
             currentTimeTaken: "5 mins",
           },
         ],
-      },
-      {
-        title: "AM sends email follow up confirming welcome call and requesting access",
-        owner: "Account Manager",
-        automationLevel: "Manual",
-        monthlyInstances: 73,
-        currentTimeTaken: "5 mins",
-        subtasks: [],
       },
       {
         title: "Review current ads strategy",
@@ -332,6 +331,7 @@ export const roadmap: Phase[] = [
         owner: "Senior Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
+        currentTimeTaken: "1 mins",
         subtasks: [],
       },
       {
@@ -345,6 +345,7 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            currentTimeTaken: "30 mins",
           },
           {
             title: "Check we have access to all accounts",
@@ -391,8 +392,8 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
-            previousTimeTaken: "25 mins",
-            currentTimeTaken: "5 mins",
+            previousTimeTaken: "40 mins",
+            currentTimeTaken: "22 mins",
           },
           {
             title: "AM Added As Admin User",
@@ -437,8 +438,8 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
-            previousTimeTaken: "90 mins",
-            currentTimeTaken: "15 mins",
+            previousTimeTaken: "40 mins",
+            currentTimeTaken: "12.5 mins",
           },
           {
             title: "Ecommerce Access Email Added As Admin User",
@@ -605,6 +606,8 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            previousTimeTaken: "20 mins",
+            currentTimeTaken: "15 mins",
           },
           {
             title: "Ads Linked Accounts Settings - Activate GA4",
@@ -661,6 +664,7 @@ export const roadmap: Phase[] = [
         owner: "New Build Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
+        currentTimeTaken: "5 mins",
         subtasks: [],
       },
       {
@@ -668,6 +672,7 @@ export const roadmap: Phase[] = [
         owner: "New Build Team",
         automationLevel: "Semi Automated",
         monthlyInstances: 73,
+        currentTimeTaken: "130 mins",
         subtasks: [],
       },
       {
@@ -675,6 +680,7 @@ export const roadmap: Phase[] = [
         owner: "New Build Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
+        currentTimeTaken: "40 mins",
         subtasks: [],
       },
       {
@@ -682,7 +688,23 @@ export const roadmap: Phase[] = [
         owner: "New Build Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
+        currentTimeTaken: "12.5 mins",
         subtasks: [],
+      },
+      {
+        title: "Client communication",
+        owner: "New Build Team",
+        automationLevel: "Manual",
+        monthlyInstances: 73,
+        subtasks: [
+          {
+            title: "Contact client if required for further information",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 73,
+            currentTimeTaken: "20 mins",
+          },
+        ],
       },
       {
         title: "Build checks",
@@ -695,6 +717,7 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            currentTimeTaken: "20 mins",
           },
           {
             title: "AM checks build is as requested",
