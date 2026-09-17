@@ -9,6 +9,7 @@ import {
 } from "@/lib/roadmap-meta";
 
 import { cn } from "@/lib/utils";
+import { formatMinutes, getMilestoneTimeSummary } from "@/lib/metrics";
 import VersionFooter from "@/components/VersionFooter";
 
 const automationClasses: Record<string, string> = {
@@ -83,6 +84,7 @@ export default function MilestoneDetail() {
   const automation = summaryAutomationLevel(milestone);
   const rows: Task[] =
     milestone.subtasks.length > 0 ? milestone.subtasks : [{ ...milestone }];
+  const timeSummary = getMilestoneTimeSummary(milestone);
 
   return (
     <main className="min-h-screen bg-background px-6 py-8 lg:px-10">
@@ -138,9 +140,25 @@ export default function MilestoneDetail() {
           Time &amp; Cost
         </h2>
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
-          <Stat label="Previous Time Taken" value={text(milestone.previousTimeTaken)} />
-          <Stat label="Current Time Taken" value={text(milestone.currentTimeTaken)} />
-          <Stat label="Monthly Instances" value={text(milestone.monthlyInstances)} />
+          {timeSummary.mode === "subtasks" ? (
+            <>
+              <Stat
+                label="Previous Time / Month"
+                value={formatMinutes(timeSummary.previousMinutesPerMonth)}
+              />
+              <Stat
+                label="Current Time / Month"
+                value={formatMinutes(timeSummary.currentMinutesPerMonth)}
+              />
+              <Stat label="Monthly Instances" value={dash} />
+            </>
+          ) : (
+            <>
+              <Stat label="Previous Time Taken" value={text(milestone.previousTimeTaken)} />
+              <Stat label="Current Time Taken" value={text(milestone.currentTimeTaken)} />
+              <Stat label="Monthly Instances" value={text(milestone.monthlyInstances)} />
+            </>
+          )}
           <Stat
             label="Previous Monthly Spend"
             value={money(milestone.previousMonthlySpend)}

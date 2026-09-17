@@ -98,7 +98,7 @@ export default function RoadmapOverview() {
             label="Time saved / month"
             value={formatMinutes(totals.minutesSaved)}
             sub={
-              totals.totalPreviousMinutes > 0
+              totals.minutesSaved > 0
                 ? `${totals.percentSaved.toFixed(0)}% reduction`
                 : undefined
             }

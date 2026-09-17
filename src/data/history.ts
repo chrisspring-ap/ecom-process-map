@@ -43,4 +43,17 @@ export const history: HistorySnapshot[] = [
     manualCount: 130,
     totalTasks: 150,
   },
+  {
+    version: "1.4",
+    date: "2026-09-17",
+    label: "Full sheet sync: new Ongoing Account Management phase, milestone restructuring, and subtask-level time totals",
+    totalPreviousMinutes: 8575,
+    totalCurrentMinutes: 52449,
+    milestonesTracked: 34,
+    totalMilestones: 53,
+    automatedCount: 10,
+    semiAutomatedCount: 10,
+    manualCount: 176,
+    totalTasks: 196,
+  },
 ];

@@ -1,4 +1,4 @@
-import type { Phase } from "@/data/roadmap";
+import type { Milestone, Phase } from "@/data/roadmap";
 
 // Time-taken values are entered as free text in the sheet (e.g. "90 mins",
 // "1.5 hours", "2 days"). This parses them into minutes so totals can be
@@ -46,7 +46,60 @@ export type ProcessTotals = {
   totalTasks: number;
 };
 
-// Time-taken is tracked at the milestone level only (not per subtask).
+export type MilestoneTimeSummary = {
+  hasData: boolean;
+  // "direct": the milestone itself carries a time-taken value.
+  // "subtasks": no milestone-level time, but one or more subtasks do, so
+  //   their per-subtask times (each weighted by that subtask's own monthly
+  //   instances, since subtasks under one milestone can happen at different
+  //   frequencies) are summed to give the milestone's monthly total.
+  // "none": no time data at either level.
+  mode: "direct" | "subtasks" | "none";
+  previousMinutesPerMonth: number;
+  currentMinutesPerMonth: number;
+};
+
+// Time is tracked either at the milestone level, or — when a milestone's
+// subitems each have their own time-taken value instead — at the subtask
+// level, in which case the subtask times are totaled up to the milestone.
+// A milestone's own directly-set time always takes priority over summing
+// its subtasks.
+export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSummary {
+  const ownPrev = parseTimeToMinutes(milestone.previousTimeTaken);
+  const ownCurr = parseTimeToMinutes(milestone.currentTimeTaken);
+
+  if (ownPrev !== undefined || ownCurr !== undefined) {
+    const instances = milestone.monthlyInstances ?? 0;
+    return {
+      hasData: true,
+      mode: "direct",
+      previousMinutesPerMonth: (ownPrev ?? 0) * instances,
+      currentMinutesPerMonth: (ownCurr ?? 0) * instances,
+    };
+  }
+
+  let previousMinutesPerMonth = 0;
+  let currentMinutesPerMonth = 0;
+  let hasData = false;
+
+  for (const subtask of milestone.subtasks) {
+    const p = parseTimeToMinutes(subtask.previousTimeTaken);
+    const c = parseTimeToMinutes(subtask.currentTimeTaken);
+    if (p === undefined && c === undefined) continue;
+    hasData = true;
+    const instances = subtask.monthlyInstances ?? milestone.monthlyInstances ?? 0;
+    previousMinutesPerMonth += (p ?? 0) * instances;
+    currentMinutesPerMonth += (c ?? 0) * instances;
+  }
+
+  return {
+    hasData,
+    mode: hasData ? "subtasks" : "none",
+    previousMinutesPerMonth,
+    currentMinutesPerMonth,
+  };
+}
+
 // Automation level is tracked per leaf task: a milestone's own subtasks if
 // it has any, otherwise the milestone itself.
 export function computeTotals(roadmap: Phase[]): ProcessTotals {
@@ -63,13 +116,11 @@ export function computeTotals(roadmap: Phase[]): ProcessTotals {
     for (const milestone of phase.milestones) {
       totalMilestones += 1;
 
-      const prevMinutes = parseTimeToMinutes(milestone.previousTimeTaken);
-      const currMinutes = parseTimeToMinutes(milestone.currentTimeTaken);
-      if (prevMinutes !== undefined || currMinutes !== undefined) {
+      const summary = getMilestoneTimeSummary(milestone);
+      if (summary.hasData) {
         milestonesTracked += 1;
-        const instances = milestone.monthlyInstances ?? 0;
-        if (prevMinutes !== undefined) totalPreviousMinutes += prevMinutes * instances;
-        if (currMinutes !== undefined) totalCurrentMinutes += currMinutes * instances;
+        totalPreviousMinutes += summary.previousMinutesPerMonth;
+        totalCurrentMinutes += summary.currentMinutesPerMonth;
       }
 
       const rows = milestone.subtasks.length > 0 ? milestone.subtasks : [milestone];
