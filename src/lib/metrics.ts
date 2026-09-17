@@ -57,6 +57,11 @@ export type MilestoneTimeSummary = {
   mode: "direct" | "subtasks" | "none";
   previousMinutesPerMonth: number;
   currentMinutesPerMonth: number;
+  // For "subtasks" mode, the average of the monthly-instances values across
+  // subtasks that have one set (subtasks can run at different frequencies,
+  // e.g. creative work, so this is an average rather than a single figure).
+  // For "direct" mode, this is just the milestone's own monthlyInstances.
+  averageMonthlyInstances?: number;
 };
 
 // Time is tracked either at the milestone level, or — when a milestone's
@@ -80,14 +85,22 @@ export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSumm
       mode: "direct",
       previousMinutesPerMonth: prev * instances,
       currentMinutesPerMonth: curr * instances,
+      averageMonthlyInstances: milestone.monthlyInstances,
     };
   }
 
   let previousMinutesPerMonth = 0;
   let currentMinutesPerMonth = 0;
   let hasData = false;
+  let instancesSum = 0;
+  let instancesCount = 0;
 
   for (const subtask of milestone.subtasks) {
+    if (subtask.monthlyInstances !== undefined) {
+      instancesSum += subtask.monthlyInstances;
+      instancesCount += 1;
+    }
+
     const p = parseTimeToMinutes(subtask.previousTimeTaken);
     const c = parseTimeToMinutes(subtask.currentTimeTaken);
     if (p === undefined && c === undefined) continue;
@@ -100,11 +113,19 @@ export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSumm
     currentMinutesPerMonth += curr * instances;
   }
 
+  // Average across subtasks that specify their own monthly instances; if
+  // none do, fall back to the milestone's own value (if any).
+  const averageMonthlyInstances =
+    instancesCount > 0
+      ? Math.round((instancesSum / instancesCount) * 10) / 10
+      : milestone.monthlyInstances;
+
   return {
     hasData,
     mode: hasData ? "subtasks" : "none",
     previousMinutesPerMonth,
     currentMinutesPerMonth,
+    averageMonthlyInstances,
   };
 }
 
