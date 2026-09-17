@@ -62,6 +62,14 @@ export type MilestoneTimeSummary = {
   // e.g. creative work, so this is an average rather than a single figure).
   // For "direct" mode, this is just the milestone's own monthlyInstances.
   averageMonthlyInstances?: number;
+  // For "subtasks" mode: currentMinutesPerMonth normalized by
+  // averageMonthlyInstances, giving a single "how long does one pass through
+  // this milestone take" figure. This exists because some subitems have
+  // their time entered as an already-totaled figure covering multiple
+  // instances rather than broken out atomically, which makes the per-row
+  // "current time taken" values unreliable to read individually — this
+  // gives a trustworthy average instead.
+  averageCurrentTimePerInstance?: number;
 };
 
 // Time is tracked either at the milestone level, or — when a milestone's
@@ -120,12 +128,18 @@ export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSumm
       ? Math.round((instancesSum / instancesCount) * 10) / 10
       : milestone.monthlyInstances;
 
+  const averageCurrentTimePerInstance =
+    averageMonthlyInstances && averageMonthlyInstances > 0
+      ? currentMinutesPerMonth / averageMonthlyInstances
+      : undefined;
+
   return {
     hasData,
     mode: hasData ? "subtasks" : "none",
     previousMinutesPerMonth,
     currentMinutesPerMonth,
     averageMonthlyInstances,
+    averageCurrentTimePerInstance,
   };
 }
 

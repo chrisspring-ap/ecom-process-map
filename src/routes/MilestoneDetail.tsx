@@ -154,6 +154,14 @@ export default function MilestoneDetail() {
                 label="Average Monthly Instances"
                 value={text(timeSummary.averageMonthlyInstances)}
               />
+              <Stat
+                label="Average Time To Complete per Instance"
+                value={
+                  timeSummary.averageCurrentTimePerInstance === undefined
+                    ? dash
+                    : formatMinutes(timeSummary.averageCurrentTimePerInstance)
+                }
+              />
             </>
           ) : (
             <>
@@ -182,14 +190,13 @@ export default function MilestoneDetail() {
           <table className="w-full table-fixed text-sm">
             <thead className="bg-secondary/60">
               <tr className="text-left text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-                <th className="w-[20%] px-4 py-3">Subitem</th>
-                <th className="w-[11%] px-4 py-3">Owner</th>
-                <th className="w-[10%] px-4 py-3">Automation Level</th>
-                <th className="w-[9%] px-4 py-3">Monthly Instances</th>
-                <th className="w-[11%] px-4 py-3">Current Time To Complete</th>
-                <th className="w-[9%] px-4 py-3">Link</th>
-                <th className="w-[19%] px-4 py-3">Notes</th>
-                <th className="w-[11%] px-4 py-3">Last Updated</th>
+                <th className="w-[24%] px-4 py-3">Subitem</th>
+                <th className="w-[12%] px-4 py-3">Owner</th>
+                <th className="w-[11%] px-4 py-3">Automation Level</th>
+                <th className="w-[10%] px-4 py-3">Monthly Instances</th>
+                <th className="w-[10%] px-4 py-3">Link</th>
+                <th className="w-[21%] px-4 py-3">Notes</th>
+                <th className="w-[12%] px-4 py-3">Last Updated</th>
               </tr>
             </thead>
             <tbody>
@@ -202,9 +209,6 @@ export default function MilestoneDetail() {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-foreground">
                     {text(row.monthlyInstances)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-foreground">
-                    {text(row.currentTimeTaken)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {row.link ? (
