@@ -65,10 +65,7 @@ export default function RoadmapOverview() {
     <main className="min-h-screen bg-background px-6 py-10 lg:px-10">
       <header className="mb-8">
         <img src={addPeopleLogo} alt="Add People" className="h-7 w-auto" />
-        <p className="mt-4 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
-          Process roadmap
-        </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
           Ecom Process Map
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
