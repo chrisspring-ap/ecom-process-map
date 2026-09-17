@@ -27,7 +27,7 @@ export const history: HistorySnapshot[] = [
     version: "1.0",
     date: "2026-09-17",
     label: "First release: full sheet sync across all phases and milestones",
-    totalPreviousMinutes: 7480,
+    totalPreviousMinutes: 77249.5,
     totalCurrentMinutes: 73473,
     milestonesTracked: 41,
     totalMilestones: 53,

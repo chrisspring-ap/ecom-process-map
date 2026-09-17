@@ -65,16 +65,21 @@ export type MilestoneTimeSummary = {
 // A milestone's own directly-set time always takes priority over summing
 // its subtasks.
 export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSummary {
-  const ownPrev = parseTimeToMinutes(milestone.previousTimeTaken);
-  const ownCurr = parseTimeToMinutes(milestone.currentTimeTaken);
+  const rawPrev = parseTimeToMinutes(milestone.previousTimeTaken);
+  const rawCurr = parseTimeToMinutes(milestone.currentTimeTaken);
 
-  if (ownPrev !== undefined || ownCurr !== undefined) {
+  if (rawPrev !== undefined || rawCurr !== undefined) {
+    // If one side is missing, fall back to the other so "before" is never
+    // understated (and never ends up lower than "current") just because a
+    // value hasn't been recorded in the sheet yet.
+    const prev = rawPrev ?? rawCurr ?? 0;
+    const curr = rawCurr ?? rawPrev ?? 0;
     const instances = milestone.monthlyInstances ?? 0;
     return {
       hasData: true,
       mode: "direct",
-      previousMinutesPerMonth: (ownPrev ?? 0) * instances,
-      currentMinutesPerMonth: (ownCurr ?? 0) * instances,
+      previousMinutesPerMonth: prev * instances,
+      currentMinutesPerMonth: curr * instances,
     };
   }
 
@@ -87,9 +92,12 @@ export function getMilestoneTimeSummary(milestone: Milestone): MilestoneTimeSumm
     const c = parseTimeToMinutes(subtask.currentTimeTaken);
     if (p === undefined && c === undefined) continue;
     hasData = true;
+    // Same fallback as above, applied per subtask.
+    const prev = p ?? c ?? 0;
+    const curr = c ?? p ?? 0;
     const instances = subtask.monthlyInstances ?? milestone.monthlyInstances ?? 0;
-    previousMinutesPerMonth += (p ?? 0) * instances;
-    currentMinutesPerMonth += (c ?? 0) * instances;
+    previousMinutesPerMonth += prev * instances;
+    currentMinutesPerMonth += curr * instances;
   }
 
   return {
