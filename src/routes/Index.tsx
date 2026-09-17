@@ -4,6 +4,7 @@ import { roadmap } from "@/data/roadmap";
 import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
 import { computeTotals, formatMinutes } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
+import addPeopleLogo from "@/assets/addpeople-logo.svg";
 import VersionFooter from "@/components/VersionFooter";
 
 const toneClasses: Record<string, string> = {
@@ -63,7 +64,8 @@ export default function RoadmapOverview() {
   return (
     <main className="min-h-screen bg-background px-6 py-10 lg:px-10">
       <header className="mb-8">
-        <p className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
+        <img src={addPeopleLogo} alt="Add People" className="h-7 w-auto" />
+        <p className="mt-4 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
           Process roadmap
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
