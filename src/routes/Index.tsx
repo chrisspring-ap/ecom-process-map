@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { roadmap } from "@/data/roadmap";
+import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { roadmap, type Milestone } from "@/data/roadmap";
 import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
 import { computeTotals, formatMinutes } from "@/lib/metrics";
+import { history } from "@/data/history";
 import { cn } from "@/lib/utils";
 import addPeopleLogo from "@/assets/addpeople-logo.svg";
 import VersionFooter from "@/components/VersionFooter";
@@ -12,6 +14,72 @@ const toneClasses: Record<string, string> = {
   semi: "bg-status-warn border-status-warn",
   manual: "bg-status-idle border-status-idle",
 };
+
+// Automation is weighted at half-credit for "Semi Automated" tasks, counted
+// at the leaf-task level (a milestone's own subtasks if it has any,
+// otherwise the milestone itself) — respects the current owner filter since
+// it's computed from the already-filtered milestone list for each phase.
+function phaseAutomationPercent(milestones: { m: Milestone }[]): number {
+  let automated = 0;
+  let semi = 0;
+  let total = 0;
+  for (const { m } of milestones) {
+    const rows = m.subtasks.length > 0 ? m.subtasks : [m];
+    for (const row of rows) {
+      total += 1;
+      if (row.automationLevel === "Automated") automated += 1;
+      else if (row.automationLevel === "Semi Automated") semi += 1;
+    }
+  }
+  return total > 0 ? ((automated + semi * 0.5) / total) * 100 : 0;
+}
+
+function PhaseAutomationBar({ percent }: { percent: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-secondary sm:w-20">
+        <div
+          className="h-full rounded-full bg-status-done"
+          style={{ width: `${Math.min(100, Math.round(percent))}%` }}
+        />
+      </div>
+      <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground">
+        {Math.round(percent)}% automated
+      </span>
+    </div>
+  );
+}
+
+// Trend of monthly minutes saved across released versions. Only renders once
+// there are at least two snapshots in history.ts, since a single point has no
+// trend to show yet — it'll start appearing automatically as more versions
+// are recorded.
+function TimeSavedSparkline() {
+  if (history.length < 2) return null;
+  const data = [...history]
+    .sort((a, b) => (a.version > b.version ? 1 : -1))
+    .map((snapshot) => ({
+      version: snapshot.version,
+      minutesSaved: snapshot.totalPreviousMinutes - snapshot.totalCurrentMinutes,
+    }));
+
+  return (
+    <div className="mt-1.5 h-6 w-full">
+      <ResponsiveContainer>
+        <LineChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+          <Line
+            type="monotone"
+            dataKey="minutesSaved"
+            stroke="var(--status-done)"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
 
 function SummaryStat({
   label,
@@ -77,12 +145,20 @@ export default function RoadmapOverview() {
       <section className="mb-8 rounded-xl border border-border bg-card px-5 py-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-foreground">Process overview</h2>
-          <Link
-            to="/history"
-            className="text-xs font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
-          >
-            View history over time →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/insights"
+              className="text-xs font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+            >
+              View insights →
+            </Link>
+            <Link
+              to="/history"
+              className="text-xs font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+            >
+              View history over time →
+            </Link>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <SummaryStat
@@ -93,16 +169,19 @@ export default function RoadmapOverview() {
             label="Time spent / month (now)"
             value={formatMinutes(totals.totalCurrentMinutes)}
           />
-          <SummaryStat
-            label="Time saved / month"
-            value={formatMinutes(totals.minutesSaved)}
-            sub={
-              totals.minutesSaved > 0
-                ? `${totals.percentSaved.toFixed(0)}% reduction`
-                : undefined
-            }
-            highlight
-          />
+          <div>
+            <SummaryStat
+              label="Time saved / month"
+              value={formatMinutes(totals.minutesSaved)}
+              sub={
+                totals.minutesSaved > 0
+                  ? `${totals.percentSaved.toFixed(0)}% reduction`
+                  : undefined
+              }
+              highlight
+            />
+            <TimeSavedSparkline />
+          </div>
           <SummaryStat
             label="Tasks automated"
             value={`${totals.automatedCount} of ${totals.totalTasks}`}
@@ -157,11 +236,14 @@ export default function RoadmapOverview() {
             key={phase.id}
             className="rounded-xl border border-border bg-card px-5 py-5"
           >
-            <div className="mb-6 flex items-center gap-3">
-              <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background">
-                {milestones.length}
-              </span>
-              <h2 className="text-sm font-bold text-foreground">{phase.name}</h2>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background">
+                  {milestones.length}
+                </span>
+                <h2 className="text-sm font-bold text-foreground">{phase.name}</h2>
+              </div>
+              <PhaseAutomationBar percent={phaseAutomationPercent(milestones)} />
             </div>
 
             <div className="-mx-1 overflow-x-auto px-1 pb-2">
