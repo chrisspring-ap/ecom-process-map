@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer } from "recharts";
+import {
+  ClipboardList,
+  Hammer,
+  RefreshCw,
+  Settings2,
+  ShoppingCart,
+  Timer,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { roadmap, type Milestone } from "@/data/roadmap";
 import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
-import { computeTotals, formatMinutes } from "@/lib/metrics";
+import { computeTotals, formatMinutes, getMilestoneTimeSummary } from "@/lib/metrics";
 import { history } from "@/data/history";
 import { cn } from "@/lib/utils";
 import addPeopleLogo from "@/assets/addpeople-logo.svg";
@@ -13,6 +23,31 @@ const toneClasses: Record<string, string> = {
   automated: "bg-status-done border-status-done",
   semi: "bg-status-warn border-status-warn",
   manual: "bg-status-idle border-status-idle",
+};
+
+const toneTextClasses: Record<string, string> = {
+  automated: "text-status-done",
+  semi: "text-status-warn",
+  manual: "text-muted-foreground",
+};
+
+const toneLabels: Record<string, string> = {
+  automated: "Automated",
+  semi: "Semi automated",
+  manual: "Manual",
+};
+
+// One small icon per phase, purely decorative, to make the phase list a
+// little more scannable than plain text headers. Falls back to no icon for
+// any phase id not covered here (e.g. if a new phase is added to the sheet).
+const PHASE_ICONS: Record<string, LucideIcon> = {
+  sales: ShoppingCart,
+  "pre-trial": ClipboardList,
+  "trial-build": Hammer,
+  "trial-period": Timer,
+  "conversion-to-recurring-revenue": RefreshCw,
+  "rec-rev-set-up": Settings2,
+  "ongoing-account-management": Users,
 };
 
 // Automation is weighted at half-credit for "Semi Automated" tasks, counted
@@ -81,6 +116,50 @@ function TimeSavedSparkline() {
   );
 }
 
+// Small donut giving an instant visual read of the automated/semi/manual
+// split, alongside the numeric breakdown already shown as text.
+function AutomationDonut({
+  automated,
+  semi,
+  manual,
+}: {
+  automated: number;
+  semi: number;
+  manual: number;
+}) {
+  const total = automated + semi + manual;
+  const percent = total > 0 ? Math.round(((automated + semi * 0.5) / total) * 100) : 0;
+  const data = [
+    { name: "Automated", value: automated, color: "var(--status-done)" },
+    { name: "Semi Automated", value: semi, color: "var(--status-warn)" },
+    { name: "Manual", value: manual, color: "var(--status-idle)" },
+  ].filter((d) => d.value > 0);
+
+  return (
+    <div className="relative flex size-14 shrink-0 items-center justify-center">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="72%"
+            outerRadius="100%"
+            paddingAngle={data.length > 1 ? 3 : 0}
+            stroke="none"
+            isAnimationActive={false}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.color} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <span className="absolute text-[10px] font-bold text-foreground">{percent}%</span>
+    </div>
+  );
+}
+
 function SummaryStat({
   label,
   value,
@@ -95,7 +174,7 @@ function SummaryStat({
   return (
     <div
       className={cn(
-        "rounded-lg bg-card px-4 py-3",
+        "rounded-lg bg-card px-4 py-3 transition-shadow duration-200 hover:shadow-md",
         highlight ? "border-2 border-foreground/40" : "border border-border",
       )}
     >
@@ -182,11 +261,24 @@ export default function RoadmapOverview() {
             />
             <TimeSavedSparkline />
           </div>
-          <SummaryStat
-            label="Tasks automated"
-            value={`${totals.automatedCount} of ${totals.totalTasks}`}
-            sub={`${totals.semiAutomatedCount} semi-automated · ${totals.manualCount} manual`}
-          />
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-shadow duration-200 hover:shadow-md">
+            <AutomationDonut
+              automated={totals.automatedCount}
+              semi={totals.semiAutomatedCount}
+              manual={totals.manualCount}
+            />
+            <div>
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                Tasks automated
+              </p>
+              <p className="mt-1 text-lg font-semibold text-foreground">
+                {totals.automatedCount} of {totals.totalTasks}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {totals.semiAutomatedCount} semi-automated · {totals.manualCount} manual
+              </p>
+            </div>
+          </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Based on {totals.milestonesTracked} of {totals.totalMilestones} milestones
@@ -231,60 +323,81 @@ export default function RoadmapOverview() {
       </div>
 
       <div className="space-y-3">
-        {phases.map(({ phase, milestones }) => (
-          <section
-            key={phase.id}
-            className="rounded-xl border border-border bg-card px-5 py-5"
-          >
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background">
-                  {milestones.length}
-                </span>
-                <h2 className="text-sm font-bold text-foreground">{phase.name}</h2>
+        {phases.map(({ phase, milestones }) => {
+          const PhaseIcon = PHASE_ICONS[phase.id];
+          return (
+            <section
+              key={phase.id}
+              className="rounded-xl border border-border bg-card px-5 py-5 transition-shadow duration-200 hover:shadow-md"
+            >
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background">
+                    {milestones.length}
+                  </span>
+                  {PhaseIcon && (
+                    <PhaseIcon className="size-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <h2 className="text-sm font-bold text-foreground">{phase.name}</h2>
+                </div>
+                <PhaseAutomationBar percent={phaseAutomationPercent(milestones)} />
               </div>
-              <PhaseAutomationBar percent={phaseAutomationPercent(milestones)} />
-            </div>
 
-            <div className="-mx-1 overflow-x-auto px-1 pb-2">
-              <div className="relative flex min-w-max items-start">
-                <div className="absolute top-9 right-6 left-6 h-px bg-border" />
-                {milestones.map(({ m, i }) => {
-                  const tone = dotTone(m.automationLevel);
-                  const style = ownerClasses(m.owner);
-                  return (
-                    <Link
-                      key={i}
-                      to={`/milestone/${phase.id}/${i}`}
-                      className="group relative flex w-36 flex-col items-center gap-0 px-1"
-                      title={`${m.title} · ${m.owner}`}
-                    >
-                      <span
-                        className={cn(
-                          "flex size-7 items-center justify-center rounded-full border text-[9px] font-bold text-background",
-                          style.dot,
-                          style.ring,
-                        )}
+              <div className="-mx-1 overflow-x-auto px-1 pb-2">
+                <div className="relative flex min-w-max items-start">
+                  <div className="absolute top-9 right-6 left-6 h-px bg-border" />
+                  {milestones.map(({ m, i }) => {
+                    const tone = dotTone(m.automationLevel);
+                    const style = ownerClasses(m.owner);
+                    const timeSummary = getMilestoneTimeSummary(m);
+                    const minutesSaved =
+                      timeSummary.previousMinutesPerMonth - timeSummary.currentMinutesPerMonth;
+                    const timeLabel = !timeSummary.hasData
+                      ? "No time data yet"
+                      : minutesSaved > 0
+                        ? `${formatMinutes(minutesSaved)} saved/mo`
+                        : "No change yet";
+                    return (
+                      <Link
+                        key={i}
+                        to={`/milestone/${phase.id}/${i}`}
+                        className="group relative flex w-36 flex-col items-center gap-0 px-1"
+                        title={`${m.title} · ${m.owner}`}
                       >
-                        {ownerInitials(m.owner)}
-                      </span>
-                      <span
-                        className={cn(
-                          "mt-1.5 size-4 rounded-full border-2 transition-transform group-hover:scale-125",
-                          toneClasses[tone],
-                        )}
-                      />
+                        <span
+                          className={cn(
+                            "flex size-7 items-center justify-center rounded-full border text-[9px] font-bold text-background",
+                            style.dot,
+                            style.ring,
+                          )}
+                        >
+                          {ownerInitials(m.owner)}
+                        </span>
+                        <span
+                          className={cn(
+                            "mt-1.5 size-4 rounded-full border-2 transition-transform group-hover:scale-125",
+                            toneClasses[tone],
+                          )}
+                        />
 
-                      <span className="mt-3 line-clamp-2 text-center text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
-                        {m.title}
-                      </span>
-                    </Link>
-                  );
-                })}
+                        <span className="mt-3 line-clamp-2 text-center text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
+                          {m.title}
+                        </span>
+
+                        <div className="mt-0 max-h-0 overflow-hidden text-center opacity-0 transition-all duration-200 group-hover:mt-1.5 group-hover:max-h-10 group-hover:opacity-100">
+                          <p className={cn("text-[10px] font-semibold", toneTextClasses[tone])}>
+                            {toneLabels[tone]}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{timeLabel}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </section>
-        ))}
+            </section>
+          );
+        })}
       </div>
 
       <VersionFooter />
