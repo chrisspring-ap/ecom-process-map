@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { history } from "@/data/history";
 import { formatMinutes } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import VersionFooter from "@/components/VersionFooter";
 
 const dash = "—";
@@ -30,13 +31,16 @@ export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-background px-6 py-8 lg:px-10">
       <div className="mx-auto max-w-5xl">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to roadmap
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            Back to roadmap
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <h1 className="mt-6 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
           History &amp; improvement over time

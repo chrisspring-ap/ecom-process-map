@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
+/* Enables class-based dark mode (toggled via .dark on <html>) instead of only
+   following the OS preference, so the in-app toggle can override it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
+  --color-on-color: var(--on-color);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -56,6 +61,10 @@
   --status-warn: oklch(0.7 0.16 62);
   --status-idle: oklch(0.72 0.01 260);
 
+  /* Stays white in both themes — used for text sitting on top of a solid
+     owner-color chip, which isn't part of the background/foreground swap. */
+  --on-color: oklch(1 0 0);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -77,6 +86,40 @@
   --ring: oklch(0.704 0.04 256.788);
 }
 
+.dark {
+  --owner-am: oklch(0.7 0.13 250);
+  --owner-build: oklch(0.7 0.17 296);
+  --owner-creative: oklch(0.74 0.17 350);
+  --owner-services: oklch(0.78 0.13 70);
+  --owner-sales: oklch(0.72 0.13 158);
+  --owner-senior: oklch(0.68 0.02 260);
+  --owner-feed: oklch(0.7 0.16 25);
+  --status-done: oklch(0.72 0.13 152);
+  --status-progress: oklch(0.7 0.13 250);
+  --status-warn: oklch(0.78 0.14 62);
+  --status-idle: oklch(0.42 0.01 260);
+
+  --background: oklch(0.16 0.018 264);
+  --foreground: oklch(0.95 0.005 260);
+  --card: oklch(0.205 0.02 264);
+  --card-foreground: oklch(0.95 0.005 260);
+  --popover: oklch(0.205 0.02 264);
+  --popover-foreground: oklch(0.95 0.005 260);
+  --primary: oklch(0.9 0.01 260);
+  --primary-foreground: oklch(0.16 0.018 264);
+  --secondary: oklch(0.27 0.02 264);
+  --secondary-foreground: oklch(0.95 0.005 260);
+  --muted: oklch(0.27 0.02 264);
+  --muted-foreground: oklch(0.66 0.02 260);
+  --accent: oklch(0.27 0.02 264);
+  --accent-foreground: oklch(0.95 0.005 260);
+  --destructive: oklch(0.65 0.2 27);
+  --destructive-foreground: oklch(0.95 0.005 260);
+  --border: oklch(0.32 0.02 264);
+  --input: oklch(0.32 0.02 264);
+  --ring: oklch(0.5 0.02 260);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -86,5 +129,6 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }

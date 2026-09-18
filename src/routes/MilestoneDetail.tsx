@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import type { Task } from "@/data/roadmap";
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { roadmap, type Task } from "@/data/roadmap";
 import {
   findPhase,
   ownerClasses,
@@ -10,6 +10,8 @@ import {
 
 import { cn } from "@/lib/utils";
 import { formatMinutes, getMilestoneTimeSummary } from "@/lib/metrics";
+import { flattenMilestones } from "@/lib/search";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import VersionFooter from "@/components/VersionFooter";
 
 const automationClasses: Record<string, string> = {
@@ -67,13 +69,16 @@ export default function MilestoneDetail() {
     return (
       <main className="min-h-screen bg-background px-6 py-8 lg:px-10">
         <div className="mx-auto max-w-5xl">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Back to roadmap
-          </Link>
+          <div className="flex items-center justify-between gap-4">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Back to roadmap
+            </Link>
+            <ThemeToggle />
+          </div>
           <p className="mt-8 text-sm text-muted-foreground">Milestone not found.</p>
         </div>
       </main>
@@ -86,16 +91,71 @@ export default function MilestoneDetail() {
     milestone.subtasks.length > 0 ? milestone.subtasks : [{ ...milestone }];
   const timeSummary = getMilestoneTimeSummary(milestone);
 
+  // Flatten every milestone across all phases into roadmap order so "prev"
+  // and "next" walk the whole process in sequence, not just within the
+  // current phase.
+  const flat = flattenMilestones(roadmap);
+  const currentPos = flat.findIndex(
+    (f) => f.phaseId === phaseId && f.milestoneIndex === index,
+  );
+  const prevMilestone = currentPos > 0 ? flat[currentPos - 1] : undefined;
+  const nextMilestone =
+    currentPos >= 0 && currentPos < flat.length - 1 ? flat[currentPos + 1] : undefined;
+
   return (
     <main className="min-h-screen bg-background px-6 py-8 lg:px-10">
       <div className="mx-auto max-w-5xl">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to roadmap
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            Back to roadmap
+          </Link>
+          <ThemeToggle />
+        </div>
+
+        <nav className="mt-4 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-foreground hover:underline">
+            Roadmap
+          </Link>
+          <span>/</span>
+          <span>{phase.name}</span>
+          <span>/</span>
+          <span className="max-w-[240px] truncate font-medium text-foreground">
+            {milestone.title}
+          </span>
+        </nav>
+
+        <div className="mt-3 flex items-center justify-between gap-3 border-b border-border pb-3 text-sm">
+          {prevMilestone ? (
+            <Link
+              to={`/milestone/${prevMilestone.phaseId}/${prevMilestone.milestoneIndex}`}
+              className="inline-flex min-w-0 items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronLeft className="size-4 shrink-0" />
+              <span className="max-w-[160px] truncate sm:max-w-[220px]">
+                {prevMilestone.title}
+              </span>
+            </Link>
+          ) : (
+            <span />
+          )}
+          {nextMilestone ? (
+            <Link
+              to={`/milestone/${nextMilestone.phaseId}/${nextMilestone.milestoneIndex}`}
+              className="inline-flex min-w-0 items-center gap-1.5 justify-end text-right font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <span className="max-w-[160px] truncate sm:max-w-[220px]">
+                {nextMilestone.title}
+              </span>
+              <ChevronRight className="size-4 shrink-0" />
+            </Link>
+          ) : (
+            <span />
+          )}
+        </div>
 
         <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
           <div className="min-w-0">
@@ -109,7 +169,7 @@ export default function MilestoneDetail() {
             <div className="mt-4 flex items-center gap-2">
               <span
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-full text-[9px] font-bold text-background",
+                  "flex size-7 items-center justify-center rounded-full text-[9px] font-bold text-on-color",
                   style.dot,
                 )}
               >

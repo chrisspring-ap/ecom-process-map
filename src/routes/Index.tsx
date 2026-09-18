@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer } from "recharts";
 import {
+  ChevronDown,
   ClipboardList,
   Hammer,
   RefreshCw,
@@ -16,6 +17,10 @@ import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap
 import { computeTotals, formatMinutes, getMilestoneTimeSummary } from "@/lib/metrics";
 import { history } from "@/data/history";
 import { cn } from "@/lib/utils";
+import { useCountUp } from "@/hooks/useCountUp";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { MilestoneSearch } from "@/components/MilestoneSearch";
 import addPeopleLogo from "@/assets/addpeople-logo.svg";
 import VersionFooter from "@/components/VersionFooter";
 
@@ -49,6 +54,22 @@ const PHASE_ICONS: Record<string, LucideIcon> = {
   "rec-rev-set-up": Settings2,
   "ongoing-account-management": Users,
 };
+
+// Renders a number that animates from its previous value up (or down) to
+// `value` whenever it changes, then formats it for display. Used on the
+// homepage stat cards for a bit of "alive" dashboard feel.
+function CountUp({
+  value,
+  formatter,
+  durationMs,
+}: {
+  value: number;
+  formatter: (n: number) => string;
+  durationMs?: number;
+}) {
+  const animated = useCountUp(value, durationMs);
+  return <>{formatter(animated)}</>;
+}
 
 // Automation is weighted at half-credit for "Semi Automated" tasks, counted
 // at the leaf-task level (a milestone's own subtasks if it has any,
@@ -128,7 +149,8 @@ function AutomationDonut({
   manual: number;
 }) {
   const total = automated + semi + manual;
-  const percent = total > 0 ? Math.round(((automated + semi * 0.5) / total) * 100) : 0;
+  const percent = total > 0 ? ((automated + semi * 0.5) / total) * 100 : 0;
+  const animatedPercent = useCountUp(percent);
   const data = [
     { name: "Automated", value: automated, color: "var(--status-done)" },
     { name: "Semi Automated", value: semi, color: "var(--status-warn)" },
@@ -155,7 +177,9 @@ function AutomationDonut({
           </Pie>
         </PieChart>
       </ResponsiveContainer>
-      <span className="absolute text-[10px] font-bold text-foreground">{percent}%</span>
+      <span className="absolute text-[10px] font-bold text-foreground">
+        {Math.round(animatedPercent)}%
+      </span>
     </div>
   );
 }
@@ -167,7 +191,7 @@ function SummaryStat({
   highlight,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   sub?: string;
   highlight?: boolean;
 }) {
@@ -196,6 +220,10 @@ function SummaryStat({
 
 export default function RoadmapOverview() {
   const [owner, setOwner] = useState<string>("All");
+  const [collapsedPhases, setCollapsedPhases] = useLocalStorageState<string[]>(
+    "epm-collapsed-phases",
+    [],
+  );
 
   const totals = computeTotals(roadmap);
 
@@ -208,10 +236,21 @@ export default function RoadmapOverview() {
     }))
     .filter(({ milestones }) => milestones.length > 0);
 
+  const toggleCollapsed = (phaseId: string) => {
+    setCollapsedPhases((current) =>
+      current.includes(phaseId)
+        ? current.filter((id) => id !== phaseId)
+        : [...current, phaseId],
+    );
+  };
+
   return (
     <main className="min-h-screen bg-background px-6 py-10 lg:px-10">
       <header className="mb-8">
-        <img src={addPeopleLogo} alt="Add People" className="h-7 w-auto" />
+        <div className="flex items-start justify-between gap-4">
+          <img src={addPeopleLogo} alt="Add People" className="h-7 w-auto" />
+          <ThemeToggle />
+        </div>
         <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
           Ecom Process Map
         </h1>
@@ -242,16 +281,20 @@ export default function RoadmapOverview() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <SummaryStat
             label="Time spent / month (before)"
-            value={formatMinutes(totals.totalPreviousMinutes)}
+            value={
+              <CountUp value={totals.totalPreviousMinutes} formatter={formatMinutes} />
+            }
           />
           <SummaryStat
             label="Time spent / month (now)"
-            value={formatMinutes(totals.totalCurrentMinutes)}
+            value={
+              <CountUp value={totals.totalCurrentMinutes} formatter={formatMinutes} />
+            }
           />
           <div>
             <SummaryStat
               label="Time saved / month"
-              value={formatMinutes(totals.minutesSaved)}
+              value={<CountUp value={totals.minutesSaved} formatter={formatMinutes} />}
               sub={
                 totals.minutesSaved > 0
                   ? `${totals.percentSaved.toFixed(0)}% reduction`
@@ -272,7 +315,10 @@ export default function RoadmapOverview() {
                 Tasks automated
               </p>
               <p className="mt-1 text-lg font-semibold text-foreground">
-                {totals.automatedCount} of {totals.totalTasks}
+                <CountUp
+                  value={totals.automatedCount}
+                  formatter={(n) => `${Math.round(n)} of ${totals.totalTasks}`}
+                />
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {totals.semiAutomatedCount} semi-automated · {totals.manualCount} manual
@@ -287,7 +333,7 @@ export default function RoadmapOverview() {
         </p>
       </section>
 
-      <div className="mb-8 flex flex-wrap items-center gap-2">
+      <div className="mb-8 flex flex-wrap items-center gap-3">
         <span className="mr-1 text-sm font-medium text-muted-foreground">
           Filter by owner:
         </span>
@@ -320,17 +366,21 @@ export default function RoadmapOverview() {
             </button>
           );
         })}
+        <div className="ml-auto w-full sm:w-auto">
+          <MilestoneSearch />
+        </div>
       </div>
 
       <div className="space-y-3">
         {phases.map(({ phase, milestones }) => {
           const PhaseIcon = PHASE_ICONS[phase.id];
+          const collapsed = collapsedPhases.includes(phase.id);
           return (
             <section
               key={phase.id}
               className="rounded-xl border border-border bg-card px-5 py-5 transition-shadow duration-200 hover:shadow-md"
             >
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background">
                     {milestones.length}
@@ -340,59 +390,90 @@ export default function RoadmapOverview() {
                   )}
                   <h2 className="text-sm font-bold text-foreground">{phase.name}</h2>
                 </div>
-                <PhaseAutomationBar percent={phaseAutomationPercent(milestones)} />
+                <div className="flex items-center gap-2">
+                  <PhaseAutomationBar percent={phaseAutomationPercent(milestones)} />
+                  <button
+                    type="button"
+                    onClick={() => toggleCollapsed(phase.id)}
+                    aria-label={collapsed ? `Expand ${phase.name}` : `Collapse ${phase.name}`}
+                    aria-expanded={!collapsed}
+                    className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                  >
+                    <ChevronDown
+                      className={cn(
+                        "size-4 transition-transform duration-200",
+                        collapsed && "-rotate-90",
+                      )}
+                    />
+                  </button>
+                </div>
               </div>
 
-              <div className="-mx-1 overflow-x-auto px-1 pb-2">
-                <div className="relative flex min-w-max items-start">
-                  <div className="absolute top-9 right-6 left-6 h-px bg-border" />
-                  {milestones.map(({ m, i }) => {
-                    const tone = dotTone(m.automationLevel);
-                    const style = ownerClasses(m.owner);
-                    const timeSummary = getMilestoneTimeSummary(m);
-                    const minutesSaved =
-                      timeSummary.previousMinutesPerMonth - timeSummary.currentMinutesPerMonth;
-                    const timeLabel = !timeSummary.hasData
-                      ? "No time data yet"
-                      : minutesSaved > 0
-                        ? `${formatMinutes(minutesSaved)} saved/mo`
-                        : "No change yet";
-                    return (
-                      <Link
-                        key={i}
-                        to={`/milestone/${phase.id}/${i}`}
-                        className="group relative flex w-36 flex-col items-center gap-0 px-1"
-                        title={`${m.title} · ${m.owner}`}
-                      >
-                        <span
-                          className={cn(
-                            "flex size-7 items-center justify-center rounded-full border text-[9px] font-bold text-background",
-                            style.dot,
-                            style.ring,
-                          )}
-                        >
-                          {ownerInitials(m.owner)}
-                        </span>
-                        <span
-                          className={cn(
-                            "mt-1.5 size-4 rounded-full border-2 transition-transform group-hover:scale-125",
-                            toneClasses[tone],
-                          )}
-                        />
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-300 ease-in-out",
+                  collapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]",
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="-mx-1 mt-4 overflow-x-auto px-1 pb-2">
+                    <div className="relative flex min-w-max items-start">
+                      <div className="absolute top-9 right-6 left-6 h-px bg-border" />
+                      {milestones.map(({ m, i }) => {
+                        const tone = dotTone(m.automationLevel);
+                        const style = ownerClasses(m.owner);
+                        const timeSummary = getMilestoneTimeSummary(m);
+                        const minutesSaved =
+                          timeSummary.previousMinutesPerMonth -
+                          timeSummary.currentMinutesPerMonth;
+                        const timeLabel = !timeSummary.hasData
+                          ? "No time data yet"
+                          : minutesSaved > 0
+                            ? `${formatMinutes(minutesSaved)} saved/mo`
+                            : "No change yet";
+                        return (
+                          <Link
+                            key={i}
+                            to={`/milestone/${phase.id}/${i}`}
+                            className="group relative flex w-36 flex-col items-center gap-0 px-1"
+                            title={`${m.title} · ${m.owner}`}
+                          >
+                            <span
+                              className={cn(
+                                "flex size-7 items-center justify-center rounded-full border text-[9px] font-bold text-on-color",
+                                style.dot,
+                                style.ring,
+                              )}
+                            >
+                              {ownerInitials(m.owner)}
+                            </span>
+                            <span
+                              className={cn(
+                                "mt-1.5 size-4 rounded-full border-2 transition-transform group-hover:scale-125",
+                                toneClasses[tone],
+                              )}
+                            />
 
-                        <span className="mt-3 line-clamp-2 text-center text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
-                          {m.title}
-                        </span>
+                            <span className="mt-3 line-clamp-2 text-center text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
+                              {m.title}
+                            </span>
 
-                        <div className="mt-0 max-h-0 overflow-hidden text-center opacity-0 transition-all duration-200 group-hover:mt-1.5 group-hover:max-h-10 group-hover:opacity-100">
-                          <p className={cn("text-[10px] font-semibold", toneTextClasses[tone])}>
-                            {toneLabels[tone]}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">{timeLabel}</p>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                            <div className="mt-0 max-h-0 overflow-hidden text-center opacity-0 transition-all duration-200 group-hover:mt-1.5 group-hover:max-h-10 group-hover:opacity-100">
+                              <p
+                                className={cn(
+                                  "text-[10px] font-semibold",
+                                  toneTextClasses[tone],
+                                )}
+                              >
+                                {toneLabels[tone]}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{timeLabel}</p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
