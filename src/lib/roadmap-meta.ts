@@ -68,13 +68,27 @@ const OWNER_INITIALS: Record<string, string> = {
   "Feed Team": "FT",
 };
 
-export const ownerInitials = (owner: string): string =>
-  OWNER_INITIALS[owner] ??
-  owner
+const fallbackInitials = (name: string): string =>
+  name
     .split(/\s+/)
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+
+// Some milestones are jointly owned, stored as e.g. "Account Manager / Sales".
+// Splits that back out into the individual role names it's made of.
+export function ownerRoles(owner: string): string[] {
+  return owner.split(" / ").map((role) => role.trim());
+}
+
+export const ownerInitials = (owner: string): string => {
+  if (OWNER_INITIALS[owner]) return OWNER_INITIALS[owner];
+  const roles = ownerRoles(owner);
+  if (roles.length > 1) {
+    return roles.map((role) => OWNER_INITIALS[role] ?? fallbackInitials(role)).join("/");
+  }
+  return fallbackInitials(owner);
+};
 
 export type DotTone = "manual" | "semi" | "automated";
 

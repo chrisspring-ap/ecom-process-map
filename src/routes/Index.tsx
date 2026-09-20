@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { roadmap, type Milestone } from "@/data/roadmap";
-import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials } from "@/lib/roadmap-meta";
+import { OWNER_ROLES, dotTone, ownerClasses, ownerInitials, ownerRoles } from "@/lib/roadmap-meta";
 import { computeTotals, formatMinutes, getMilestoneTimeSummary } from "@/lib/metrics";
 import { history } from "@/data/history";
 import { cn } from "@/lib/utils";
@@ -232,7 +232,7 @@ export default function RoadmapOverview() {
       phase,
       milestones: phase.milestones
         .map((m, i) => ({ m, i }))
-        .filter(({ m }) => owner === "All" || m.owner === owner),
+        .filter(({ m }) => owner === "All" || ownerRoles(m.owner).includes(owner)),
     }))
     .filter(({ milestones }) => milestones.length > 0);
 
