@@ -97,6 +97,7 @@ export const roadmap: Phase[] = [
             owner: "Senior Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            currentTimeTaken: "2 mins",
           },
         ],
       },
@@ -129,7 +130,7 @@ export const roadmap: Phase[] = [
         ],
       },
       {
-        title: "Inital client contacnt",
+        title: "Inital client contact",
         owner: "Account Manager",
         automationLevel: "Manual",
         monthlyInstances: 73,
@@ -327,7 +328,7 @@ export const roadmap: Phase[] = [
     name: "Trial Build",
     milestones: [
       {
-        title: "Tech assign build case to team member",
+        title: "Case assigned to tech team member",
         owner: "Senior Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
@@ -335,7 +336,7 @@ export const roadmap: Phase[] = [
         subtasks: [],
       },
       {
-        title: "Tech complete pre build checks",
+        title: "Pre build checks",
         owner: "New Build Team",
         automationLevel: "Manual",
         monthlyInstances: 73,
@@ -514,6 +515,7 @@ export const roadmap: Phase[] = [
             owner: "Feed Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            currentTimeTaken: "90 mins",
           },
           {
             title: "Configure feed app/plugin (if required)",
@@ -717,13 +719,14 @@ export const roadmap: Phase[] = [
             owner: "New Build Team",
             automationLevel: "Manual",
             monthlyInstances: 73,
-            currentTimeTaken: "20 mins",
+            currentTimeTaken: "25 mins",
           },
           {
             title: "AM checks build is as requested",
             owner: "Account Manager",
             automationLevel: "Manual",
             monthlyInstances: 73,
+            currentTimeTaken: "20 mins",
           },
           {
             title: "Build summary sent to AM via Monday",
@@ -1178,6 +1181,7 @@ export const roadmap: Phase[] = [
             title: "Email sent to AM that trial has converted",
             owner: "Senior Team",
             automationLevel: "Manual",
+            currentTimeTaken: "2 mins",
           },
         ],
       },
@@ -1248,6 +1252,45 @@ export const roadmap: Phase[] = [
         owner: "Feed Team",
         automationLevel: "Manual",
         subtasks: [],
+      },
+      {
+        title: "Feed Optimisation Gold",
+        owner: "Feed Team",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Feed op carried out in GMC / switching feed apps",
+            owner: "Feed Team",
+            automationLevel: "Manual",
+            currentTimeTaken: "60 mins",
+          },
+        ],
+      },
+      {
+        title: "Feed Disapprovals",
+        owner: "Feed Team",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Resolving any disapprovals in the account",
+            owner: "Feed Team",
+            automationLevel: "Manual",
+            currentTimeTaken: "60 mins",
+          },
+        ],
+      },
+      {
+        title: "Feed Summary Creation",
+        owner: "Feed Team",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "When optimisations are complete, summary of work done completed",
+            owner: "Feed Team",
+            automationLevel: "Manual",
+            currentTimeTaken: "20 mins",
+          },
+        ],
       },
       {
         title: "Email Account Linking",
@@ -1417,9 +1460,85 @@ export const roadmap: Phase[] = [
     ],
   },
   {
+    id: "advancement-process",
+    name: "Advancement Process",
+    milestones: [
+      {
+        title: "Advancement Meeting",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Advancement meeting completed between onboarder & growth specialist, using google form as a guide",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "30 mins",
+          },
+        ],
+      },
+      {
+        title: "Advancement Deck",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Creating the advancement deck",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "60 mins",
+          },
+        ],
+      },
+      {
+        title: "Advancement Call",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Advancement call delivered",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "60 mins",
+          },
+          {
+            title: "Advancement call follow up completed (email client & update CRM)",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "30 mins",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "ongoing-account-management",
     name: "Ongoing Account Management",
     milestones: [
+      {
+        title: "Feed Drop Cases",
+        owner: "Feed Team",
+        automationLevel: "Semi Automated",
+        subtasks: [
+          {
+            title: "Automated drop cases",
+            owner: "Feed Team",
+            automationLevel: "Semi Automated",
+            currentTimeTaken: "30 mins",
+          },
+        ],
+      },
+      {
+        title: "Feed Optimisation Reports",
+        owner: "Feed Team",
+        automationLevel: "Semi Automated",
+        subtasks: [
+          {
+            title: "Reports added to the case after optimisations",
+            owner: "Feed Team",
+            automationLevel: "Semi Automated",
+          },
+        ],
+      },
       {
         title: "Recurring Video",
         owner: "Creative Team",
@@ -1670,6 +1789,274 @@ export const roadmap: Phase[] = [
             title: "Standard internal review in account to continue service before advancemenet",
             owner: "Account Manager",
             automationLevel: "Manual",
+          },
+        ],
+      },
+      {
+        title: "Tracking  Troubleshooting",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 48,
+        subtasks: [
+          {
+            title: "Investigate revenue tracking issues",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 48,
+            currentTimeTaken: "48 mins",
+          },
+        ],
+      },
+      {
+        title: "Promotion Cases",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 10,
+        subtasks: [
+          {
+            title: "Set up Google Ads & GMC promotions",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 10,
+            currentTimeTaken: "20 mins",
+          },
+        ],
+      },
+      {
+        title: "Microsoft Cases",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 9,
+        subtasks: [
+          {
+            title: "Microsoft Ads Setup",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 9,
+            currentTimeTaken: "142 mins",
+          },
+          {
+            title: "Microsoft Tracking",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 6,
+            currentTimeTaken: "77 mins",
+          },
+          {
+            title: "Microsoft Account Troubleshooting",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 5,
+            currentTimeTaken: "70 mins",
+          },
+          {
+            title: "Microsoft Campaigns",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 3.5,
+            currentTimeTaken: "70 mins",
+          },
+          {
+            title: "Microsoft Campaign Troubleshooting",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 3,
+            currentTimeTaken: "61 mins",
+          },
+          {
+            title: "Microsoft Feed Troubleshooting",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 2,
+            currentTimeTaken: "60 mins",
+          },
+        ],
+      },
+      {
+        title: "Google Ads Troubleshooting",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 11.4,
+        subtasks: [
+          {
+            title: "Google Ads Troubleshooting",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 11.4,
+            currentTimeTaken: "40 mins",
+          },
+          {
+            title: "Google Ads Account Suspension)",
+            owner: "Additional Services Team",
+            automationLevel: "Manual",
+            monthlyInstances: 1.8,
+            currentTimeTaken: "42 mins",
+          },
+        ],
+      },
+      {
+        title: "Account Performance Report",
+        owner: "Additional Services Team",
+        automationLevel: "Automated",
+        monthlyInstances: 18.7,
+        previousTimeTaken: "10 mins",
+        currentTimeTaken: "0 mins",
+        subtasks: [],
+      },
+      {
+        title: "Competitor Analysis",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 2.5,
+        currentTimeTaken: "41 mins",
+        subtasks: [],
+      },
+      {
+        title: "CMS Platform Change",
+        owner: "Additional Services Team",
+        automationLevel: "Manual",
+        monthlyInstances: 2.1,
+        currentTimeTaken: "60 mins",
+        subtasks: [],
+      },
+      {
+        title: "Campaign Optimisations / New Campaigns",
+        owner: "New Build Team",
+        automationLevel: "Manual",
+        monthlyInstances: 64.1,
+        subtasks: [
+          {
+            title: "Performance Max",
+            owner: "New Build Team",
+            automationLevel: "Semi Automated",
+            monthlyInstances: 64.1,
+            currentTimeTaken: "86 mins",
+          },
+          {
+            title: "Search",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 25.9,
+            currentTimeTaken: "80 mins",
+          },
+          {
+            title: "Re-Structure",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 17.8,
+            currentTimeTaken: "97 mins",
+          },
+          {
+            title: "Ad Copy Refresh",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 14,
+            currentTimeTaken: "120 mins",
+          },
+          {
+            title: "Shopping",
+            owner: "New Build Team",
+            automationLevel: "Semi Automated",
+            monthlyInstances: 9.8,
+            currentTimeTaken: "51 mins",
+          },
+          {
+            title: "Other",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 8.1,
+            currentTimeTaken: "90 mins",
+          },
+          {
+            title: "Brand",
+            owner: "New Build Team",
+            automationLevel: "Semi Automated",
+            monthlyInstances: 2.9,
+            currentTimeTaken: "60 mins",
+          },
+          {
+            title: "Demand Gen",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 2.4,
+            currentTimeTaken: "100 mins",
+          },
+          {
+            title: "Display",
+            owner: "New Build Team",
+            automationLevel: "Semi Automated",
+            monthlyInstances: 2,
+            currentTimeTaken: "79 mins",
+          },
+          {
+            title: "Out of Date Ad Copy",
+            owner: "New Build Team",
+            automationLevel: "Manual",
+            monthlyInstances: 1,
+            currentTimeTaken: "37 mins",
+          },
+        ],
+      },
+      {
+        title: "Internal",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Internal review",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "30 mins",
+          },
+        ],
+      },
+      {
+        title: "Report Call",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Report call prep",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "30 mins",
+          },
+          {
+            title: "Report call",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "30 mins",
+          },
+          {
+            title: "Report call follow up (email client & update CRM)",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "15 mins",
+          },
+        ],
+      },
+      {
+        title: "Growth Deck",
+        owner: "Account Manager",
+        automationLevel: "Manual",
+        subtasks: [
+          {
+            title: "Run growth deck automation",
+            owner: "Account Manager",
+            automationLevel: "Semi Automated",
+            currentTimeTaken: "10 mins",
+          },
+          {
+            title: "Amend growth deck accordingly",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "20 mins",
+          },
+          {
+            title: "Growth deck delivered",
+            owner: "Account Manager",
+            automationLevel: "Manual",
+            currentTimeTaken: "60 mins",
           },
         ],
       },
