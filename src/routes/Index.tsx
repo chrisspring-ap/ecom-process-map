@@ -9,6 +9,7 @@ import {
   Settings2,
   ShoppingCart,
   Timer,
+  TrendingUp,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -52,6 +53,7 @@ const PHASE_ICONS: Record<string, LucideIcon> = {
   "trial-period": Timer,
   "conversion-to-recurring-revenue": RefreshCw,
   "rec-rev-set-up": Settings2,
+  "advancement-process": TrendingUp,
   "ongoing-account-management": Users,
 };
 
